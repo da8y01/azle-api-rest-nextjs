@@ -1,6 +1,15 @@
 import { Server, ic } from 'azle';
 import cors from "cors";
-import express from 'express';
+import express, { Request, Response, NextFunction} from 'express';
+
+function isAnonymous(req: Request, res: Response, next: NextFunction) {
+    if (ic.caller().isAnonymous()) {
+        res.status(401);
+        res.send();
+    } else {
+        next();
+    }
+}
 
 export default Server(() => {
     const app = express();
@@ -8,16 +17,7 @@ export default Server(() => {
     app.use(cors());
     app.use(express.json());
 
-    // app.use((req, res, next) => {
-    //     if (ic.caller().isAnonymous()) {
-    //         res.status(401);
-    //         res.send();
-    //     } else {
-    //         next();
-    //     }
-    // });
-
-    app.post('/test', (req, res) => {
+    app.post('/test', isAnonymous, (req, res) => {
         res.json(req.body);
     });
 
